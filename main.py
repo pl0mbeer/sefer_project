@@ -14,9 +14,9 @@ warnings.filterwarnings('ignore')
 
 # НАСТРОЙКИ
 
-YOLO_MODEL_PATH = "./yolo11_best.pt"
-OCR_MODEL_PATH = "./best_ocr_crnn.pth"
-# Автоопределение: GPU если доступен, иначе CPU
+YOLO_MODEL_PATH = "./yolo11_best.pt" # путь модели детекции
+OCR_MODEL_PATH = "./best_ocr_crnn.pth" # путь модели ocr
+
 DEVICE = 0 if torch.cuda.is_available() else "cpu"
 
 # ВВОД ДАННЫХ
@@ -50,6 +50,7 @@ def load_models():
 
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 
+# Определяем категорию уверенности
 def get_confidence_category(conf):
     if conf >= 0.85:
         return "sure"
@@ -58,12 +59,14 @@ def get_confidence_category(conf):
     else:
         return "not sure"
 
+# Удаляем недопустимые символы для имён файлов
 def clean_filename(text, prefix):
     text = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', text).strip()
     if not text:
         text = "unknown"
     return f"{prefix}_{text}" if prefix else text
 
+# Генерируем уникальное имя файла с суффиксами _1, _2 и т.д.
 def get_unique_path(directory, stem, ext):
     candidate = directory / f"{stem}{ext}"
     counter = 1
@@ -95,7 +98,7 @@ def process_images(img_dir, prefix, yolo, ocr_model):
         if len(boxes) == 0:
             results.append({
                 "original_file": img_path.name, "status": "no_detection",
-                "ocr_text": "", "ocr_confidence": 0.0, "category": "нет детекции"
+                "ocr_text": "", "ocr_confidence": 0.0, "category": "no detection"
             })
             continue
 
